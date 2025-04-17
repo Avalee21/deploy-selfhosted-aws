@@ -1,0 +1,76 @@
+sudo bash -c 'cat > /usr/local/bin/collect_metrics.sh << "EOL"
+#!/bin/bash
+
+# Get disk utilization percentage
+DISK_UTIL=$(df -h | grep /dev/xvda1 | awk '"'"'{print $5}'"'"' | sed '"'"'s/%//'"'"')
+
+# Get disk I/O stats
+# Capture initial values
+DISK_READ_SECTORS_START=$(cat /proc/diskstats | grep xvda | awk '"'"'{print $6}'"'"')
+DISK_WRITE_SECTORS_START=$(cat /proc/diskstats | grep xvda | awk '"'"'{print $10}'"'"')
+
+# Get memory utilization
+MEM_UTIL=$(free | grep Mem | awk '"'"'{print $3/$2 * 100.0}'"'"')
+
+# Get CPU utilization
+CPU_UTIL=$(top -bn1 | grep "Cpu(s)" | awk '"'"'{print $2 + $4}'"'"')
+
+# Get network traffic
+# Capture initial values
+RX_BYTES_START=$(cat /proc/net/dev | grep eth0 | awk '"'"'{print $2}'"'"')
+TX_BYTES_START=$(cat /proc/net/dev | grep eth0 | awk '"'"'{print $10}'"'"')
+
+# Wait 1 second for measurement
+sleep 1
+
+# Capture final disk I/O values
+DISK_READ_SECTORS_END=$(cat /proc/diskstats | grep xvda | awk '"'"'{print $6}'"'"')
+DISK_WRITE_SECTORS_END=$(cat /proc/diskstats | grep xvda | awk '"'"'{print $10}'"'"')
+
+# Calculate disk I/O rates (sectors per second)
+DISK_READ_RATE=$((DISK_READ_SECTORS_END - DISK_READ_SECTORS_START))
+DISK_WRITE_RATE=$((DISK_WRITE_SECTORS_END - DISK_WRITE_SECTORS_START))
+
+# Convert to KB per second (each sector is typically 512 bytes)
+DISK_READ_KB=$((DISK_READ_RATE * 512 / 1024))
+DISK_WRITE_KB=$((DISK_WRITE_RATE * 512 / 1024))
+
+# Capture final network values
+RX_BYTES_END=$(cat /proc/net/dev | grep eth0 | awk '"'"'{print $2}'"'"')
+TX_BYTES_END=$(cat /proc/net/dev | grep eth0 | awk '"'"'{print $10}'"'"')
+
+# Calculate network rate per second
+RX_RATE=$((RX_BYTES_END - RX_BYTES_START))
+TX_RATE=$((TX_BYTES_END - TX_BYTES_START))
+
+# Get container status (1 for running, 0 for stopped)
+CONTAINER_STATUS=$(docker ps -q --filter "name=minio" | wc -l)
+
+# Get MinIO API health
+MINIO_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/minio/health/live)
+
+# Publish metrics to CloudWatch
+aws cloudwatch put-metric-data --namespace MinIO --metric-name DiskUtilization --value $DISK_UTIL --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name DiskReadKBps --value $DISK_READ_KB --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name DiskWriteKBps --value $DISK_WRITE_KB --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name MemoryUtilization --value $MEM_UTIL --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name CPUUtilization --value $CPU_UTIL --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name NetworkRxBytes --value $RX_RATE --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name NetworkTxBytes --value $TX_RATE --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name ContainerStatus --value $CONTAINER_STATUS --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name APIHealth --value $MINIO_HEALTH --region us-east-1
+EOL'
+
+# Make executable
+sudo chmod +x /usr/local/bin/collect_metrics.sh
+
+# Set up to run every minute
+sudo bash -c 'while true; do /usr/local/bin/collect_metrics.sh; sleep 60; done' > /dev/null 2>&1 &
+
+
+
+
+
+
+
+
