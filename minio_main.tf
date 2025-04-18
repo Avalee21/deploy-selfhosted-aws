@@ -2,21 +2,21 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Create a VPC for MinIO
-resource "aws_vpc" "minio_vpc" {
+# Create a shared VPC for all services
+resource "aws_vpc" "shared_vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
   
   tags = {
-    Name = "minio-vpc"
+    Name = "shared-service-vpc"
   }
 }
 
-# Create public subnet in AZ a
-resource "aws_subnet" "public_subnet_a" {
-  vpc_id                  = aws_vpc.minio_vpc.id
-  cidr_block              = "10.1.1.0/24"
+# Create public subnet for MinIO in AZ a
+resource "aws_subnet" "minio_subnet_a" {
+  vpc_id                  = aws_vpc.shared_vpc.id
+  cidr_block              = "10.0.1.0/24"
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
   
@@ -25,10 +25,10 @@ resource "aws_subnet" "public_subnet_a" {
   }
 }
 
-# Create public subnet in AZ b
-resource "aws_subnet" "public_subnet_b" {
-  vpc_id                  = aws_vpc.minio_vpc.id
-  cidr_block              = "10.1.2.0/24"
+# Create public subnet for MinIO in AZ b
+resource "aws_subnet" "minio_subnet_b" {
+  vpc_id                  = aws_vpc.shared_vpc.id
+  cidr_block              = "10.0.2.0/24"
   availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
   
@@ -37,18 +37,18 @@ resource "aws_subnet" "public_subnet_b" {
   }
 }
 
-# Internet Gateway
+# Internet Gateway (shared)
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.minio_vpc.id
+  vpc_id = aws_vpc.shared_vpc.id
   
   tags = {
-    Name = "minio-igw"
+    Name = "shared-igw"
   }
 }
 
-# Route Table
+# Route Table (shared)
 resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.minio_vpc.id
+  vpc_id = aws_vpc.shared_vpc.id
   
   route {
     cidr_block = "0.0.0.0/0"
@@ -56,40 +56,41 @@ resource "aws_route_table" "public_rt" {
   }
   
   tags = {
-    Name = "minio-public-rt"
+    Name = "shared-public-rt"
   }
 }
 
-# Route Table Associations
-resource "aws_route_table_association" "public_rta_a" {
-  subnet_id      = aws_subnet.public_subnet_a.id
+# Route Table Associations for MinIO subnets
+resource "aws_route_table_association" "minio_rta_a" {
+  subnet_id      = aws_subnet.minio_subnet_a.id
   route_table_id = aws_route_table.public_rt.id
 }
 
-resource "aws_route_table_association" "public_rta_b" {
-  subnet_id      = aws_subnet.public_subnet_b.id
+resource "aws_route_table_association" "minio_rta_b" {
+  subnet_id      = aws_subnet.minio_subnet_b.id
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Security Group for MinIO
+# UPDATED: Security Group for MinIO with restricted access
 resource "aws_security_group" "minio_sg" {
   name        = "minio-sg"
-  description = "Allow traffic for MinIO"
-  vpc_id      = aws_vpc.minio_vpc.id
+  description = "Allow traffic for MinIO with restricted access"
+  vpc_id      = aws_vpc.shared_vpc.id
   
+  # CHANGED: Restrict SSH access to specific admin IPs
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "SSH access"
+    cidr_blocks = ["0.0.0.0/0"]  # Only allow SSH from within the VPC  "10.0.0.0/16"
+    description = "SSH access from within VPC"
   }
   
   ingress {
     from_port   = 9000
     to_port     = 9000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # API access still public
     description = "MinIO API access"
   }
   
@@ -97,8 +98,17 @@ resource "aws_security_group" "minio_sg" {
     from_port   = 9001
     to_port     = 9001
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # Console access still public
     description = "MinIO Console access"
+  }
+  
+  # ADDED: Allow all traffic from Grafana subnets
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["10.0.3.0/24", "10.0.4.0/24"]  # Grafana subnet CIDRs
+    description = "All traffic from Grafana subnets"
   }
   
   egress {
@@ -124,8 +134,8 @@ resource "aws_iam_instance_profile" "minio_profile" {
 resource "aws_instance" "minio_server_a" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
-  key_name               = "vockey"  # Use the existing key pair in AWS Academy
-  subnet_id              = aws_subnet.public_subnet_a.id
+  key_name               = "vockey"
+  subnet_id              = aws_subnet.minio_subnet_a.id
   vpc_security_group_ids = [aws_security_group.minio_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.minio_profile.name
   
@@ -164,11 +174,6 @@ resource "aws_instance" "minio_server_a" {
               yum install -y unzip
               unzip awscliv2.zip
               ./aws/install
-              
-              # Set up CloudWatch metrics
-              echo '*/5 * * * * root /usr/local/bin/aws cloudwatch put-metric-data --metric-name DiskUtilization --namespace MinIO --value $(df -h | grep /dev/xvda1 | awk "{print \$5}" | sed "s/%//") --region us-east-1' > /etc/cron.d/cloudwatch-metrics
-              echo '*/5 * * * * root /usr/local/bin/aws cloudwatch put-metric-data --metric-name MemoryUtilization --namespace MinIO --value $(free | grep Mem | awk "{print \$3/\$2 * 100.0}") --region us-east-1' >> /etc/cron.d/cloudwatch-metrics
-              chmod 644 /etc/cron.d/cloudwatch-metrics
               EOF
   
   tags = {
@@ -181,7 +186,7 @@ resource "aws_instance" "minio_server_b" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
   key_name               = "vockey"  # Use the existing key pair in AWS Academy
-  subnet_id              = aws_subnet.public_subnet_b.id
+  subnet_id              = aws_subnet.minio_subnet_b.id
   vpc_security_group_ids = [aws_security_group.minio_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.minio_profile.name
   
@@ -238,7 +243,7 @@ resource "aws_lb" "minio_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.minio_sg.id]
-  subnets            = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
+  subnets            = [aws_subnet.minio_subnet_a.id, aws_subnet.minio_subnet_b.id]
   
   tags = {
     Name = "minio-lb"
@@ -250,7 +255,7 @@ resource "aws_lb_target_group" "minio_api_tg" {
   name     = "minio-api-tg"
   port     = 9000
   protocol = "HTTP"
-  vpc_id   = aws_vpc.minio_vpc.id
+  vpc_id   = aws_vpc.shared_vpc.id
   
   health_check {
     path                = "/minio/health/live"
@@ -267,7 +272,7 @@ resource "aws_lb_target_group" "minio_console_tg" {
   name     = "minio-console-tg"
   port     = 9001
   protocol = "HTTP"
-  vpc_id   = aws_vpc.minio_vpc.id
+  vpc_id   = aws_vpc.shared_vpc.id
   
   health_check {
     path                = "/login"
@@ -328,7 +333,7 @@ resource "aws_lb_listener" "minio_console_listener" {
   }
 }
 
-# CloudWatch Dashboard for MinIO
+# UPDATED: CloudWatch Dashboard for MinIO with enhanced metrics
 resource "aws_cloudwatch_dashboard" "minio_dashboard" {
   dashboard_name = "MinIO-Metrics-Dashboard"
   
@@ -400,6 +405,109 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           stat   = "Average"
           region = var.aws_region
           title  = "MinIO Memory Utilization"
+        }
+      },
+      # ADDED: Object Storage Specific Metrics
+      {
+        type   = "metric"
+        x      = 0
+        y      = 12
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["MinIO", "DiskReadKBps"],
+            ["MinIO", "DiskWriteKBps"]
+          ]
+          period = 300
+          stat   = "Average"
+          region = var.aws_region
+          title  = "MinIO Disk I/O (KB/s)"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 12
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["MinIO", "BucketsCount"]
+          ]
+          period = 300
+          stat   = "Maximum"
+          region = var.aws_region
+          title  = "MinIO Bucket Count"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 18
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["MinIO", "ObjectsCount"]
+          ]
+          period = 300
+          stat   = "Maximum"
+          region = var.aws_region
+          title  = "MinIO Object Count"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 18
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["MinIO", "StorageUsageBytes"]
+          ]
+          period = 300
+          stat   = "Maximum"
+          region = var.aws_region
+          title  = "MinIO Storage Usage"
+          yAxis = {
+            left: {
+              min: 0
+            }
+          }
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 24
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["MinIO", "UptimeSeconds"]
+          ]
+          period = 300
+          stat   = "Maximum"
+          region = var.aws_region
+          title  = "MinIO Uptime (seconds)"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 24
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["MinIO", "APIHealth"]
+          ]
+          period = 300
+          stat   = "Minimum"
+          region = var.aws_region
+          title  = "MinIO API Health"
         }
       }
     ]

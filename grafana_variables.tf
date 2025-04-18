@@ -7,13 +7,13 @@ variable "aws_region" {
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
-  default     = "10.0.0.0/16"
+  default     = "10.0.0.0/16"  # Same as the MinIO VPC CIDR
 }
 
 variable "public_subnet_cidr" {
   description = "CIDR block for the public subnet"
   type        = string
-  default     = "10.0.1.0/24"
+  default     = "10.0.5.0/24"  # Different from MinIO subnets
 }
 
 variable "ami_id" {

@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
-  default     = "10.1.0.0/16"  # Different from Grafana VPC CIDR
+  default     = "10.0.0.0/16"  # CHANGED: Using a single shared VPC CIDR
 }
 
 variable "ami_id" {

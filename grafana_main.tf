@@ -2,20 +2,17 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Create a VPC
-resource "aws_vpc" "grafana_vpc" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-  
-  tags = {
-    Name = "grafana-vpc"
+# Use the shared VPC created in the MinIO configuration
+data "aws_vpc" "shared_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["shared-service-vpc"]
   }
 }
 
-# Create public subnet
+# Create public subnet for Grafana
 resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.grafana_vpc.id
+  vpc_id                  = data.aws_vpc.shared_vpc.id
   cidr_block              = var.public_subnet_cidr
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
@@ -25,22 +22,21 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-# Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.grafana_vpc.id
-  
-  tags = {
-    Name = "grafana-igw"
+# Use the shared Internet Gateway
+data "aws_internet_gateway" "igw" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [data.aws_vpc.shared_vpc.id]
   }
 }
 
 # Route Table
 resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.grafana_vpc.id
+  vpc_id = data.aws_vpc.shared_vpc.id
   
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = data.aws_internet_gateway.igw.id
   }
   
   tags = {
@@ -54,26 +50,36 @@ resource "aws_route_table_association" "public_rta" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Security Group for Grafana
+# Security Group for Grafana with improved settings
 resource "aws_security_group" "grafana_sg" {
   name        = "grafana-sg"
-  description = "Allow traffic for Grafana"
-  vpc_id      = aws_vpc.grafana_vpc.id
+  description = "Allow traffic for Grafana with restricted access"
+  vpc_id      = data.aws_vpc.shared_vpc.id
   
+  # Restrict SSH access to within VPC
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "SSH access"
+    cidr_blocks = ["10.0.0.0/16"]  # Only allow SSH from within the VPC
+    description = "SSH access from within VPC"
   }
   
   ingress {
     from_port   = 3000
     to_port     = 3000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # Grafana web access still public
     description = "Grafana web access"
+  }
+  
+  # Allow all traffic from MinIO subnets
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["10.0.1.0/24", "10.0.2.0/24"]  # MinIO subnet CIDRs
+    description = "All traffic from MinIO subnets"
   }
   
   egress {
@@ -103,7 +109,7 @@ data "aws_instances" "minio_server" {
   }
 }
 
-# EC2 Instance for Grafana
+# EC2 Instance for Grafana - mostly original configuration
 resource "aws_instance" "grafana_server" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
@@ -167,7 +173,7 @@ resource "aws_instance" "grafana_server" {
                     path: /var/lib/grafana/dashboards
               EOL
               
-              # Create MinIO dashboard
+              # Create simplified MinIO dashboard with the most important metrics
               cat > /var/lib/grafana/dashboards/minio_dashboard.json << EOL
               {
                 "annotations": {
@@ -210,7 +216,7 @@ resource "aws_instance" "grafana_server" {
                       "y": 0
                     },
                     "hiddenSeries": false,
-                    "id": 2,
+                    "id": 1,
                     "legend": {
                       "avg": false,
                       "current": false,
@@ -227,7 +233,6 @@ resource "aws_instance" "grafana_server" {
                       "alertThreshold": true
                     },
                     "percentage": false,
-                    "pluginVersion": "7.3.7",
                     "pointradius": 2,
                     "points": false,
                     "renderer": "flot",
@@ -237,13 +242,13 @@ resource "aws_instance" "grafana_server" {
                     "steppedLine": false,
                     "targets": [
                       {
-                        "alias": "",
+                        "alias": "CPU Utilization",
                         "dimensions": {},
                         "expression": "",
                         "id": "",
                         "matchExact": true,
                         "metricName": "CPUUtilization",
-                        "namespace": "AWS/EC2",
+                        "namespace": "MinIO",
                         "period": "",
                         "refId": "A",
                         "region": "${var.aws_region}",
@@ -272,11 +277,11 @@ resource "aws_instance" "grafana_server" {
                     },
                     "yaxes": [
                       {
-                        "format": "short",
+                        "format": "percent",
                         "label": null,
                         "logBase": 1,
                         "max": null,
-                        "min": null,
+                        "min": 0,
                         "show": true
                       },
                       {
@@ -285,7 +290,7 @@ resource "aws_instance" "grafana_server" {
                         "logBase": 1,
                         "max": null,
                         "min": null,
-                        "show": true
+                        "show": false
                       }
                     ],
                     "yaxis": {
@@ -314,7 +319,7 @@ resource "aws_instance" "grafana_server" {
                       "y": 0
                     },
                     "hiddenSeries": false,
-                    "id": 4,
+                    "id": 2,
                     "legend": {
                       "avg": false,
                       "current": false,
@@ -331,7 +336,6 @@ resource "aws_instance" "grafana_server" {
                       "alertThreshold": true
                     },
                     "percentage": false,
-                    "pluginVersion": "7.3.7",
                     "pointradius": 2,
                     "points": false,
                     "renderer": "flot",
@@ -341,111 +345,7 @@ resource "aws_instance" "grafana_server" {
                     "steppedLine": false,
                     "targets": [
                       {
-                        "alias": "DiskUtilization",
-                        "dimensions": {},
-                        "expression": "",
-                        "id": "",
-                        "matchExact": true,
-                        "metricName": "DiskUtilization",
-                        "namespace": "MinIO",
-                        "period": "",
-                        "refId": "A",
-                        "region": "${var.aws_region}",
-                        "statistics": [
-                          "Average"
-                        ]
-                      }
-                    ],
-                    "thresholds": [],
-                    "timeFrom": null,
-                    "timeRegions": [],
-                    "timeShift": null,
-                    "title": "MinIO Disk Utilization",
-                    "tooltip": {
-                      "shared": true,
-                      "sort": 0,
-                      "value_type": "individual"
-                    },
-                    "type": "graph",
-                    "xaxis": {
-                      "buckets": null,
-                      "mode": "time",
-                      "name": null,
-                      "show": true,
-                      "values": []
-                    },
-                    "yaxes": [
-                      {
-                        "format": "percent",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": null,
-                        "show": true
-                      },
-                      {
-                        "format": "short",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": null,
-                        "show": true
-                      }
-                    ],
-                    "yaxis": {
-                      "align": false,
-                      "alignLevel": null
-                    }
-                  },
-                  {
-                    "aliasColors": {},
-                    "bars": false,
-                    "dashLength": 10,
-                    "dashes": false,
-                    "datasource": "CloudWatch",
-                    "fieldConfig": {
-                      "defaults": {
-                        "custom": {}
-                      },
-                      "overrides": []
-                    },
-                    "fill": 1,
-                    "fillGradient": 0,
-                    "gridPos": {
-                      "h": 8,
-                      "w": 12,
-                      "x": 0,
-                      "y": 8
-                    },
-                    "hiddenSeries": false,
-                    "id": 6,
-                    "legend": {
-                      "avg": false,
-                      "current": false,
-                      "max": false,
-                      "min": false,
-                      "show": true,
-                      "total": false,
-                      "values": false
-                    },
-                    "lines": true,
-                    "linewidth": 1,
-                    "nullPointMode": "null",
-                    "options": {
-                      "alertThreshold": true
-                    },
-                    "percentage": false,
-                    "pluginVersion": "7.3.7",
-                    "pointradius": 2,
-                    "points": false,
-                    "renderer": "flot",
-                    "seriesOverrides": [],
-                    "spaceLength": 10,
-                    "stack": false,
-                    "steppedLine": false,
-                    "targets": [
-                      {
-                        "alias": "MemoryUtilization",
+                        "alias": "Memory Utilization",
                         "dimensions": {},
                         "expression": "",
                         "id": "",
@@ -484,7 +384,7 @@ resource "aws_instance" "grafana_server" {
                         "label": null,
                         "logBase": 1,
                         "max": null,
-                        "min": null,
+                        "min": 0,
                         "show": true
                       },
                       {
@@ -493,7 +393,125 @@ resource "aws_instance" "grafana_server" {
                         "logBase": 1,
                         "max": null,
                         "min": null,
+                        "show": false
+                      }
+                    ],
+                    "yaxis": {
+                      "align": false,
+                      "alignLevel": null
+                    }
+                  },
+                  {
+                    "aliasColors": {},
+                    "bars": false,
+                    "dashLength": 10,
+                    "dashes": false,
+                    "datasource": "CloudWatch",
+                    "fieldConfig": {
+                      "defaults": {
+                        "custom": {}
+                      },
+                      "overrides": []
+                    },
+                    "fill": 1,
+                    "fillGradient": 0,
+                    "gridPos": {
+                      "h": 8,
+                      "w": 12,
+                      "x": 0,
+                      "y": 8
+                    },
+                    "hiddenSeries": false,
+                    "id": 3,
+                    "legend": {
+                      "avg": false,
+                      "current": false,
+                      "max": false,
+                      "min": false,
+                      "show": true,
+                      "total": false,
+                      "values": false
+                    },
+                    "lines": true,
+                    "linewidth": 1,
+                    "nullPointMode": "null",
+                    "options": {
+                      "alertThreshold": true
+                    },
+                    "percentage": false,
+                    "pointradius": 2,
+                    "points": false,
+                    "renderer": "flot",
+                    "seriesOverrides": [],
+                    "spaceLength": 10,
+                    "stack": false,
+                    "steppedLine": false,
+                    "targets": [
+                      {
+                        "alias": "Disk Read (KB/s)",
+                        "dimensions": {},
+                        "expression": "",
+                        "id": "",
+                        "matchExact": true,
+                        "metricName": "DiskReadKBps",
+                        "namespace": "MinIO",
+                        "period": "",
+                        "refId": "A",
+                        "region": "${var.aws_region}",
+                        "statistics": [
+                          "Average"
+                        ]
+                      },
+                      {
+                        "alias": "Disk Write (KB/s)",
+                        "dimensions": {},
+                        "expression": "",
+                        "id": "",
+                        "matchExact": true,
+                        "metricName": "DiskWriteKBps",
+                        "namespace": "MinIO",
+                        "period": "",
+                        "refId": "B",
+                        "region": "${var.aws_region}",
+                        "statistics": [
+                          "Average"
+                        ]
+                      }
+                    ],
+                    "thresholds": [],
+                    "timeFrom": null,
+                    "timeRegions": [],
+                    "timeShift": null,
+                    "title": "MinIO Disk I/O",
+                    "tooltip": {
+                      "shared": true,
+                      "sort": 0,
+                      "value_type": "individual"
+                    },
+                    "type": "graph",
+                    "xaxis": {
+                      "buckets": null,
+                      "mode": "time",
+                      "name": null,
+                      "show": true,
+                      "values": []
+                    },
+                    "yaxes": [
+                      {
+                        "format": "KBs",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": 0,
                         "show": true
+                      },
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": false
                       }
                     ],
                     "yaxis": {
@@ -522,7 +540,7 @@ resource "aws_instance" "grafana_server" {
                       "y": 8
                     },
                     "hiddenSeries": false,
-                    "id": 8,
+                    "id": 4,
                     "legend": {
                       "avg": false,
                       "current": false,
@@ -539,7 +557,6 @@ resource "aws_instance" "grafana_server" {
                       "alertThreshold": true
                     },
                     "percentage": false,
-                    "pluginVersion": "7.3.7",
                     "pointradius": 2,
                     "points": false,
                     "renderer": "flot",
@@ -549,33 +566,18 @@ resource "aws_instance" "grafana_server" {
                     "steppedLine": false,
                     "targets": [
                       {
-                        "alias": "NetworkIn",
+                        "alias": "Storage Usage",
                         "dimensions": {},
                         "expression": "",
                         "id": "",
                         "matchExact": true,
-                        "metricName": "NetworkIn",
-                        "namespace": "AWS/EC2",
+                        "metricName": "StorageUsageBytes",
+                        "namespace": "MinIO",
                         "period": "",
                         "refId": "A",
                         "region": "${var.aws_region}",
                         "statistics": [
-                          "Average"
-                        ]
-                      },
-                      {
-                        "alias": "NetworkOut",
-                        "dimensions": {},
-                        "expression": "",
-                        "id": "",
-                        "matchExact": true,
-                        "metricName": "NetworkOut",
-                        "namespace": "AWS/EC2",
-                        "period": "",
-                        "refId": "B",
-                        "region": "${var.aws_region}",
-                        "statistics": [
-                          "Average"
+                          "Maximum"
                         ]
                       }
                     ],
@@ -583,7 +585,7 @@ resource "aws_instance" "grafana_server" {
                     "timeFrom": null,
                     "timeRegions": [],
                     "timeShift": null,
-                    "title": "MinIO Network Traffic",
+                    "title": "MinIO Storage Usage",
                     "tooltip": {
                       "shared": true,
                       "sort": 0,
@@ -603,7 +605,7 @@ resource "aws_instance" "grafana_server" {
                         "label": null,
                         "logBase": 1,
                         "max": null,
-                        "min": null,
+                        "min": 0,
                         "show": true
                       },
                       {
@@ -612,7 +614,7 @@ resource "aws_instance" "grafana_server" {
                         "logBase": 1,
                         "max": null,
                         "min": null,
-                        "show": true
+                        "show": false
                       }
                     ],
                     "yaxis": {
@@ -629,7 +631,7 @@ resource "aws_instance" "grafana_server" {
                   "list": []
                 },
                 "time": {
-                  "from": "now-3h",
+                  "from": "now-1h",
                   "to": "now"
                 },
                 "timepicker": {},
