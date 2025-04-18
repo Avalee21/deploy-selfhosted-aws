@@ -1,0 +1,95 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f8f9fa" />
+  
+  <!-- AWS Cloud Border -->
+  <rect x="50" y="50" width="700" height="500" rx="20" ry="20" fill="none" stroke="#232F3E" stroke-width="2" stroke-dasharray="5,5" />
+  <text x="400" y="35" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#232F3E">AWS Cloud</text>
+  
+  <!-- VPC Container -->
+  <rect x="80" y="80" width="640" height="440" rx="10" ry="10" fill="#E8F4FA" stroke="#147EB3" stroke-width="2" />
+  <text x="400" y="100" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#147EB3">Shared VPC (10.0.0.0/16)</text>
+  
+  <!-- Availability Zone -->
+  <rect x="100" y="120" width="600" height="300" rx="5" ry="5" fill="#F2F7F9" stroke="#147EB3" stroke-width="1" stroke-dasharray="5,3" />
+  <text x="400" y="140" font-family="Arial" font-size="14" text-anchor="middle" fill="#147EB3">Availability Zone B</text>
+  
+  <!-- Public Subnet -->
+  <rect x="140" y="160" width="520" height="240" rx="5" ry="5" fill="#FFF3E0" stroke="#EF6C00" stroke-width="1" />
+  <text x="400" y="180" font-family="Arial" font-size="14" text-anchor="middle" fill="#EF6C00">Grafana Public Subnet (10.0.5.0/24)</text>
+  
+  <!-- EC2 Instance -->
+  <rect x="300" y="200" width="200" height="80" rx="5" ry="5" fill="#FFE0B2" stroke="#EF6C00" stroke-width="2" />
+  <text x="400" y="235" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#EF6C00">Grafana Server</text>
+  <text x="400" y="255" font-family="Arial" font-size="12" text-anchor="middle" fill="#EF6C00">t3.micro EC2 Instance</text>
+  
+  <!-- S3 Bucket -->
+  <rect x="300" y="320" width="200" height="60" rx="5" ry="5" fill="#FFCCBC" stroke="#D84315" stroke-width="2" />
+  <text x="400" y="350" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#D84315">Grafana Storage</text>
+  <text x="400" y="370" font-family="Arial" font-size="12" text-anchor="middle" fill="#D84315">S3 Bucket</text>
+  
+  <!-- CloudWatch -->
+  <rect x="200" y="440" width="200" height="60" rx="5" ry="5" fill="#FFECB3" stroke="#FFA000" stroke-width="2" />
+  <text x="300" y="470" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFA000">CloudWatch Metrics</text>
+  <text x="300" y="490" font-family="Arial" font-size="12" text-anchor="middle" fill="#FFA000">Data Source</text>
+  
+  <!-- Security Group -->
+  <rect x="220" y="200" width="40" height="160" rx="5" ry="5" fill="#FFE0B2" stroke="#E65100" stroke-width="2" />
+  <text x="240" y="280" font-family="Arial" font-size="10" text-anchor="middle" fill="#E65100" transform="rotate(-90 240,280)">Security Group</text>
+  
+  <!-- Internet Gateway -->
+  <rect x="450" y="500" width="100" height="40" rx="5" ry="5" fill="#F1F8E9" stroke="#7CB342" stroke-width="2" />
+  <text x="500" y="525" font-family="Arial" font-size="12" text-anchor="middle" fill="#33691E">Internet Gateway</text>
+  
+  <!-- Other Services -->
+  <rect x="540" y="200" width="120" height="60" rx="5" ry="5" fill="#C8E6C9" stroke="#2E7D32" stroke-width="2" />
+  <text x="600" y="235" font-family="Arial" font-size="14" text-anchor="middle" fill="#2E7D32">MinIO Servers</text>
+  
+  <rect x="540" y="280" width="120" height="60" rx="5" ry="5" fill="#BBDEFB" stroke="#1565C0" stroke-width="2" />
+  <text x="600" y="315" font-family="Arial" font-size="14" text-anchor="middle" fill="#1565C0">Cryptpad Server</text>
+  
+  <!-- Connection Lines -->
+  <!-- EC2 to S3 -->
+  <line x1="400" y1="280" x2="400" y2="320" stroke="#D84315" stroke-width="2" stroke-dasharray="5,3" />
+  
+  <!-- EC2 to CloudWatch -->
+  <line x1="350" y1="280" x2="300" y2="440" stroke="#FFA000" stroke-width="2" stroke-dasharray="5,3" />
+  
+  <!-- EC2 to Security Group -->
+  <line x1="260" y1="240" x2="300" y2="240" stroke="#E65100" stroke-width="2" stroke-dasharray="3,3" />
+  
+  <!-- Connectivity to Other Services -->
+  <line x1="500" y1="230" x2="540" y2="230" stroke="#2E7D32" stroke-width="2" stroke-dasharray="5,3" />
+  <line x1="500" y1="250" x2="540" y2="310" stroke="#1565C0" stroke-width="2" stroke-dasharray="5,3" />
+  
+  <!-- CloudWatch to Other Services -->
+  <line x1="400" y1="470" x2="550" y2="260" stroke="#FFA000" stroke-width="1" stroke-dasharray="3,3" />
+  <line x1="400" y1="470" x2="550" y2="310" stroke="#FFA000" stroke-width="1" stroke-dasharray="3,3" />
+  
+  <!-- Internet Gateway to VPC -->
+  <line x1="500" y1="500" x2="500" y2="480" stroke="#7CB342" stroke-width="2" />
+  
+  <!-- Service Description -->
+  <rect x="120" y="200" width="70" height="160" rx="5" ry="5" fill="white" stroke="#EF6C00" stroke-width="1" />
+  <text x="155" y="220" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="#EF6C00">Grafana</text>
+  <text x="155" y="235" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="#EF6C00">Service</text>
+  
+  <text x="125" y="260" font-family="Arial" font-size="10" fill="#232F3E">• Monitoring</text>
+  <text x="125" y="280" font-family="Arial" font-size="10" fill="#232F3E">• Dashboards</text>
+  <text x="125" y="300" font-family="Arial" font-size="10" fill="#232F3E">• Visualizations</text>
+  <text x="125" y="320" font-family="Arial" font-size="10" fill="#232F3E">• CloudWatch</text>
+  <text x="125" y="340" font-family="Arial" font-size="10" fill="#232F3E">• Integration</text>
+  
+  <!-- Dashboards -->
+  <rect x="440" y="380" width="220" height="90" rx="5" ry="5" fill="#FFFDE7" stroke="#FFA000" stroke-width="1" />
+  <text x="550" y="400" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFA000">Grafana Dashboards</text>
+  
+  <rect x="450" y="410" width="90" height="50" rx="5" ry="5" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1" />
+  <text x="495" y="440" font-family="Arial" font-size="10" text-anchor="middle" fill="#2E7D32">MinIO Metrics</text>
+  
+  <rect x="560" y="410" width="90" height="50" rx="5" ry="5" fill="#BBDEFB" stroke="#1565C0" stroke-width="1" />
+  <text x="605" y="440" font-family="Arial" font-size="10" text-anchor="middle" fill="#1565C0">Cryptpad Metrics</text>
+  
+  <!-- Connect Grafana to Dashboards -->
+  <line x1="450" y1="280" x2="550" y2="380" stroke="#EF6C00" stroke-width="2" stroke-dasharray="5,3" />
+</svg>
