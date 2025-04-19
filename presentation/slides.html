@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS Cloud-Based Collaborative Environment</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+        overflow-x: hidden;
+      }
+
+      .slide {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 4rem;
+        box-sizing: border-box;
+        scroll-snap-align: start;
+        position: relative;
+        margin-bottom: 20rem;
+      }
+
+      .title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #0a4b78;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      .subtitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #0a6ebd;
+        margin-bottom: 1rem;
+      }
+
+      .content {
+        max-width: 1200px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .two-column {
+        display: flex;
+        width: 100%;
+        gap: 2rem;
+      }
+
+      .column {
+        flex: 1;
+      }
+
+      .card {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #0a6ebd;
+      }
+
+      .card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+
+      ul {
+        padding-left: 1.5rem;
+      }
+
+      li {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+      }
+
+      .gradient-bg {
+        background: linear-gradient(135deg, #e6f2ff 0%, #e6f7ff 100%);
+      }
+
+      .center-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 100%;
+      }
+
+      .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .card-container .card {
+        width: calc(70% - 1rem);
+        min-width: 300px;
+      }
+
+      .service-card {
+        width: 300px;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+        text-align: center;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 1rem;
+      }
+
+      .cryptpad {
+        background-color: #e3f2fd;
+        border-left: 4px solid #1565c0;
+      }
+
+      .minio {
+        background-color: #e8f5e9;
+        border-left: 4px solid #2e7d32;
+      }
+
+      .grafana {
+        background-color: #fff3e0;
+        border-left: 4px solid #ef6c00;
+      }
+
+      .navigation {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+      }
+
+      .nav-button {
+        background-color: #0a4b78;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .nav-button:hover {
+        background-color: #0a6ebd;
+      }
+
+      .slide-indicator {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+      }
+
+      .indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #ccc;
+        cursor: pointer;
+      }
+
+      .indicator.active {
+        background-color: #0a4b78;
+      }
+
+      .architecture-image {
+        max-width: 90%;
+        max-height: 70vh;
+        margin: 2rem 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 0.5rem;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .two-column {
+          flex-direction: column;
+        }
+
+        .card-container .card {
+          width: 100%;
+        }
+
+        .title {
+          font-size: 2rem;
+        }
+
+        .subtitle {
+          font-size: 1.3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Slide 1: Title -->
+    <div id="slide1" class="slide gradient-bg">
+      <div class="center-content">
+        <div class="title">AWS Cloud-Based Collaborative Environment</div>
+        <p
+          style="
+            font-size: 1.2rem;
+            max-width: 800px;
+            text-align: center;
+            color: #444;
+          "
+        >
+          A secure, integrated platform for document collaboration, object
+          storage, and comprehensive monitoring
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 2: What We've Deployed -->
+    <div id="slide2" class="slide">
+      <div class="title">What We've Deployed</div>
+      <div style="display: flex; justify-content: center; flex-wrap: wrap">
+        <div class="service-card cryptpad">
+          <h3 style="color: #1565c0">Cryptpad</h3>
+          <p>
+            Zero-knowledge collaborative document editor with end-to-end
+            encryption
+          </p>
+        </div>
+        <div class="service-card minio">
+          <h3 style="color: #2e7d32">MinIO</h3>
+          <p>
+            S3-compatible object storage system providing distributed storage
+          </p>
+        </div>
+        <div class="service-card grafana">
+          <h3 style="color: #ef6c00">Grafana</h3>
+          <p>
+            Comprehensive monitoring platform for visualizing system metrics
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Architecture Overview -->
+    <div id="slide3" class="slide">
+      <div class="title">Architecture Overview</div>
+      <img
+        src="./architecture.svg"
+        alt="Architecture Diagram"
+        class="architecture-image"
+      />
+      <div class="card" style="max-width: 800px; text-align: center">
+        <p style="font-size: 1.1rem">
+          Our solution is built on a shared VPC with integrated services that
+          work together. Cryptpad serves as our front-end collaborative
+          platform, MinIO provides the underlying storage infrastructure, and
+          Grafana monitors everything, pulling metrics from CloudWatch.
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 4: Cryptpad -->
+    <div id="slide4" class="slide">
+      <div class="title">Cryptpad</div>
+      <div class="content">
+        <div class="two-column">
+          <div class="column">
+            <div class="subtitle">Functionality and Features</div>
+            <ul>
+              <li>
+                Real-time collaborative document editing with end-to-end
+                encryption
+              </li>
+              <li>
+                Supports rich text documents, kanban boards, code editor and
+                more
+              </li>
+              <li>Zero-knowledge architecture ensuring privacy and security</li>
+              <li>No user accounts required for basic collaboration</li>
+              <li>Content remains accessible through unique document URLs</li>
+            </ul>
+          </div>
+          <div class="column">
+            <div class="subtitle">AWS Implementation</div>
+            <ul>
+              <li>
+                EC2 Instance: t3.small instance provides sufficient CPU and
+                memory for Node.js
+              </li>
+              <li>
+                EBS Volume: 20GB persistent storage safeguarding documents if
+                instance terminates
+              </li>
+              <li>
+                S3 Backup: Automated daily backups to S3 for disaster recovery
+              </li>
+              <!-- <li>
+                CloudWatch Monitoring: Custom metrics tracking Cryptpad
+                performance
+              </li> -->
+              <li>
+                Security Groups: Controls access to specific service ports
+                (3000, 3001, 3003)
+              </li>
+            </ul>
+            <div class="column">
+              <div class="subtitle">Server Deployment</div>
+              <ul>
+                <li>
+                  Install required dependencies, then clone and set up CryptPad
+                  from its official repository
+                </li>
+                <li>
+                  Customize the configuration file to define server origin,
+                  ports, storage paths, and instance behavior
+                </li>
+                <li>
+                  Schedule cron jobs to automatically clean up expired and
+                  archived documents for efficient storage management
+                </li>
+                <li>
+                  Use Amazon S3 to back up key directories such as datastore/,
+                  data/, and config.js for disaster recovery
+                </li>
+                <li>
+                  Set up a systemd service to ensure CryptPad automatically
+                  restarts after system reboots
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <img
+          src="./cryptpad_architecture.svg"
+          alt="Architecture Diagram"
+          class="architecture-image"
+        />
+      </div>
+    </div>
+
+    <!-- Slide 5: MinIO -->
+    <div id="slide5" class="slide">
+      <div class="title">MinIO</div>
+      <div class="content">
+        <div class="two-column">
+          <div class="column">
+            <div class="subtitle">Functionality and Features</div>
+            <ul>
+              <li>
+                S3-compatible API with identical endpoints and authentication
+                methods
+              </li>
+              <li>
+                Web-based console for intuitive bucket and object management
+              </li>
+              <li>
+                Comprehensive lifecycle policies for automated data management
+              </li>
+              <li>
+                Seamless integration with AWS CLI, SDKs, and third-party tools
+              </li>
+              <li>Self-hosted solution maintaining control of stored data</li>
+            </ul>
+          </div>
+          <div class="column">
+            <div class="subtitle">AWS Implementation</div>
+            <ul>
+              <li>
+                Multi-AZ Deployment: Two instances across availability zones for
+                redundancy
+              </li>
+              <li>Load Balancer: Distributes requests across both instances</li>
+              <li>Docker Containers: Simplifies deployment and maintenance</li>
+              <li>
+                EBS Volumes: 30GB per server providing 60GB total distributed
+                storage
+              </li>
+              <li>
+                CloudWatch Integration: Detailed metrics on storage utilization
+                and performance
+              </li>
+            </ul>
+          </div>
+        </div>
+        <img
+          src="./minio_architecture.svg"
+          alt="Architecture Diagram"
+          class="architecture-image"
+        />
+      </div>
+    </div>
+
+    <!-- Slide 6: Grafana -->
+    <div id="slide6" class="slide">
+      <div class="title">Grafana</div>
+      <div class="content">
+        <div class="two-column">
+          <div class="column">
+            <div class="subtitle">Functionality and Features</div>
+            <ul>
+              <li>
+                Comprehensive dashboards visualizing system and application
+                metrics
+              </li>
+              <li>Real-time monitoring of all infrastructure components</li>
+              <li>Pre-configured dashboards for MinIO and Cryptpad</li>
+              <li>Alert capabilities for performance thresholds</li>
+              <li>Single pane of glass for operational monitoring</li>
+            </ul>
+          </div>
+          <div class="column">
+            <div class="subtitle">AWS Implementation</div>
+            <ul>
+              <li>
+                EC2 Instance: t3.micro instance sufficient for monitoring
+                requirements
+              </li>
+              <li>CloudWatch Integration: Pulling metrics from all services</li>
+              <li>
+                S3 Storage: Persistent configuration and dashboard backups
+              </li>
+              <li>
+                Security Groups: Controlled access to management interface
+              </li>
+              <li>
+                Custom Dashboards: Purpose-built visualizations for our specific
+                services
+              </li>
+            </ul>
+          </div>
+        </div>
+        <img
+          src="./grafana_architecture.svg"
+          alt="Architecture Diagram"
+          class="architecture-image"
+        />
+      </div>
+    </div>
+
+    <!-- Slide 7: Why This Design -->
+    <!-- <div id="slide7" class="slide">
+      <div class="title">Why This Design?</div>
+      <div class="content">
+        <div class="card-container">
+          <div class="card" style="border-left-color: #6a1b9a">
+            <div class="card-title">Complete Collaboration Solution</div>
+            <p>
+              Integrated platform from document editing to underlying storage
+              with seamless user experience
+            </p>
+          </div>
+          <div class="card" style="border-left-color: #303f9f">
+            <div class="card-title">Data Protection</div>
+            <p>
+              Multiple backup mechanisms across S3 and EBS ensuring data
+              durability and resilience
+            </p>
+          </div>
+          <div class="card" style="border-left-color: #fbc02d">
+            <div class="card-title">High Visibility</div>
+            <p>
+              Comprehensive monitoring through Grafana dashboards with detailed
+              CloudWatch metrics
+            </p>
+          </div>
+          <div class="card" style="border-left-color: #388e3c">
+            <div class="card-title">Resource Efficiency</div>
+            <p>
+              Right-sized instances and shared infrastructure maximizing
+              available AWS Academy resources
+            </p>
+          </div>
+          <div class="card" style="border-left-color: #d32f2f">
+            <div class="card-title">Security</div>
+            <p>
+              Proper network isolation through subnets and security groups
+              limiting attack surface
+            </p>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Slide 8: What We Can Achieve -->
+    <div id="slide8" class="slide">
+      <div class="title">What We Can Achieve</div>
+      <div class="content">
+        <div class="card" style="border-left-color: #1565c0">
+          <div class="card-title">Secure Document Collaboration</div>
+          <p>
+            Teams can work together on documents, spreadsheets, and
+            presentations with end-to-end encryption and no dependency on
+            third-party services
+          </p>
+        </div>
+        <div class="card" style="border-left-color: #2e7d32">
+          <div class="card-title">Reliable Data Storage</div>
+          <p>
+            Store and manage large amounts of data with S3-compatible APIs, high
+            availability, and automated backup mechanisms
+          </p>
+        </div>
+        <div class="card" style="border-left-color: #ef6c00">
+          <div class="card-title">Operational Visibility</div>
+          <p>
+            Maintain complete visibility into system health, performance
+            metrics, and resource utilization through intuitive dashboards
+          </p>
+        </div>
+        <div class="card" style="border-left-color: #6a1b9a">
+          <div class="card-title">Disaster Recovery</div>
+          <p>
+            Quickly recover from failures through our multi-layered backup
+            strategy spanning both S3 and persistent EBS volumes
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Conclusion -->
+    <div id="slide9" class="slide gradient-bg">
+      <div class="center-content">
+        <div class="title">Conclusion</div>
+        <div
+          class="card"
+          style="max-width: 800px; text-align: center; background-color: white"
+        >
+          <p style="font-size: 1.2rem">
+            This architecture demonstrates how to build a robust, multi-service
+            cloud environment that delivers real business value while working
+            within the constraints of AWS Academy resources.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+      <button id="prevButton" class="nav-button">Previous</button>
+      <button id="nextButton" class="nav-button">Next</button>
+    </div>
+
+    <!-- Slide Indicators -->
+    <div class="slide-indicator">
+      <div class="indicator active" data-slide="1"></div>
+      <div class="indicator" data-slide="2"></div>
+      <div class="indicator" data-slide="3"></div>
+      <div class="indicator" data-slide="4"></div>
+      <div class="indicator" data-slide="5"></div>
+      <div class="indicator" data-slide="6"></div>
+      <div class="indicator" data-slide="7"></div>
+      <div class="indicator" data-slide="8"></div>
+      <div class="indicator" data-slide="9"></div>
+    </div>
+
+    <script>
+      let currentSlide = 1;
+      const totalSlides = 9;
+
+      function updateSlideIndicators() {
+        document.querySelectorAll(".indicator").forEach((indicator, index) => {
+          if (index + 1 === currentSlide) {
+            indicator.classList.add("active");
+          } else {
+            indicator.classList.remove("active");
+          }
+        });
+      }
+
+      function navigateTo(slideNumber) {
+        if (slideNumber < 1) slideNumber = 1;
+        if (slideNumber > totalSlides) slideNumber = totalSlides;
+
+        currentSlide = slideNumber;
+        document
+          .getElementById(`slide${slideNumber}`)
+          .scrollIntoView({ behavior: "smooth" });
+        updateSlideIndicators();
+      }
+
+      document.getElementById("prevButton").addEventListener("click", () => {
+        navigateTo(currentSlide - 1);
+      });
+
+      document.getElementById("nextButton").addEventListener("click", () => {
+        navigateTo(currentSlide + 1);
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          navigateTo(currentSlide + 1);
+        } else if (e.key === "ArrowLeft") {
+          navigateTo(currentSlide - 1);
+        }
+      });
+
+      document.querySelectorAll(".indicator").forEach((indicator) => {
+        indicator.addEventListener("click", () => {
+          const slideNumber = parseInt(indicator.getAttribute("data-slide"));
+          navigateTo(slideNumber);
+        });
+      });
+
+      // Handle scroll events to update current slide
+      let isScrolling;
+      window.addEventListener("scroll", () => {
+        clearTimeout(isScrolling);
+
+        isScrolling = setTimeout(() => {
+          const slideElements = document.querySelectorAll(".slide");
+          let closestSlide = 1;
+          let minDistance = Infinity;
+
+          slideElements.forEach((slide, index) => {
+            const rect = slide.getBoundingClientRect();
+            const distance = Math.abs(rect.top);
+
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestSlide = index + 1;
+            }
+          });
+
+          if (currentSlide !== closestSlide) {
+            currentSlide = closestSlide;
+            updateSlideIndicators();
+          }
+        }, 100);
+      });
+    </script>
+  </body>
+</html>
