@@ -373,12 +373,12 @@
                 Secure access control with API keys and policy-based permissions
               </li>
               <li>
-                S3-compatible API enabling familiar operations and seamless
-                integration with AWS CLI, SDKs, and third-party tools
-              </li>
-              <li>
                 Built-in data protection with versioning, object locking and
                 replication
+              </li>
+              <li>
+                S3-compatible API enabling familiar operations and seamless
+                integration with AWS CLI, SDKs, and third-party tools
               </li>
             </ul>
           </div>
@@ -386,18 +386,24 @@
             <div class="subtitle">AWS Implementation</div>
             <ul>
               <li>
-                Multi-AZ Deployment: Two instances across availability zones for
-                redundancy
-              </li>
-              <li>Load Balancer: Distributes requests across both instances</li>
-              <li>Docker Containers: Simplifies deployment and maintenance</li>
-              <li>
-                EBS Volumes: 30GB per server providing 60GB total distributed
-                storage
+                <strong>Multi-AZ Deployment:</strong> Servers in two zones
+                prevent downtime during outages
               </li>
               <li>
-                CloudWatch Integration: Detailed metrics on storage utilization
-                and performance
+                <strong>Load Balancer:</strong> Routes traffic efficiently
+                between instances for consistent access
+              </li>
+              <li>
+                <strong>Docker Containers:</strong> Packages software for easy
+                deployment and updates
+              </li>
+              <li>
+                <strong>EBS Storage:</strong> 30GB per server (60GB total) with
+                data that persists beyond instance lifecycle
+              </li>
+              <li>
+                <strong>CloudWatch Metrics:</strong> Monitors performance with
+                custom dashboards tracking critical indicators
               </li>
             </ul>
           </div>

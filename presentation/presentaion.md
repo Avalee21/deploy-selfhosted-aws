@@ -65,3 +65,16 @@ This architecture demonstrates how to build a robust, multi-service cloud enviro
 - Secure collaborative document editing
 - Comprehensive monitoring and visualization
 - Strong data protection through multiple backup mechanisms
+
+
+
+
+
+
+
+
+This diagram shows our MinIO storage system in AWS Cloud. We built it to be reliable by putting it in two different zones (A and B).
+We set up a shared network (VPC 10.0.0.0/16) as the foundation. In each zone, we have a MinIO server running on a small t3.micro computer. These servers are in their own networks - Subnet A (10.0.1.0/24) and Subnet B (10.0.2.0/24).
+The MinIO software runs in Docker containers, making it easy to manage. Each server has 30GB of storage, giving us 60GB total.
+A load balancer directs traffic between the servers, ensuring smooth operation. We track performance using CloudWatch with a custom dashboard.
+Everything connects to the internet through a gateway, allowing users to access the storage service from anywhere.
