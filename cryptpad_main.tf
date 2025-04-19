@@ -445,7 +445,7 @@ resource "aws_cloudwatch_dashboard" "cryptpad_dashboard" {
           metrics = [
             ["AWS/EC2", "CPUUtilization", "InstanceId", aws_instance.cryptpad_server.id]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "Cryptpad CPU Utilization"
@@ -462,7 +462,7 @@ resource "aws_cloudwatch_dashboard" "cryptpad_dashboard" {
             ["AWS/EC2", "NetworkIn", "InstanceId", aws_instance.cryptpad_server.id],
             ["AWS/EC2", "NetworkOut", "InstanceId", aws_instance.cryptpad_server.id]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "Cryptpad Network Traffic"
@@ -479,7 +479,7 @@ resource "aws_cloudwatch_dashboard" "cryptpad_dashboard" {
             ["AWS/EC2", "DiskReadBytes", "InstanceId", aws_instance.cryptpad_server.id],
             ["AWS/EC2", "DiskWriteBytes", "InstanceId", aws_instance.cryptpad_server.id]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "Cryptpad Disk I/O"

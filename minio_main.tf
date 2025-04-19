@@ -350,7 +350,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
             ["AWS/EC2", "CPUUtilization", "InstanceId", aws_instance.minio_server_a.id],
             ["AWS/EC2", "CPUUtilization", "InstanceId", aws_instance.minio_server_b.id]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "MinIO Servers CPU Utilization"
@@ -369,7 +369,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
             ["AWS/EC2", "NetworkIn", "InstanceId", aws_instance.minio_server_b.id],
             ["AWS/EC2", "NetworkOut", "InstanceId", aws_instance.minio_server_b.id]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "MinIO Network Traffic"
@@ -385,7 +385,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           metrics = [
             ["MinIO", "DiskUtilization"]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "MinIO Disk Utilization"
@@ -401,7 +401,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           metrics = [
             ["MinIO", "MemoryUtilization"]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "MinIO Memory Utilization"
@@ -419,7 +419,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
             ["MinIO", "DiskReadKBps"],
             ["MinIO", "DiskWriteKBps"]
           ]
-          period = 300
+          period = 60
           stat   = "Average"
           region = var.aws_region
           title  = "MinIO Disk I/O (KB/s)"
@@ -435,7 +435,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           metrics = [
             ["MinIO", "BucketsCount"]
           ]
-          period = 300
+          period = 60
           stat   = "Maximum"
           region = var.aws_region
           title  = "MinIO Bucket Count"
@@ -451,7 +451,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           metrics = [
             ["MinIO", "ObjectsCount"]
           ]
-          period = 300
+          period = 60
           stat   = "Maximum"
           region = var.aws_region
           title  = "MinIO Object Count"
@@ -467,7 +467,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           metrics = [
             ["MinIO", "StorageUsageBytes"]
           ]
-          period = 300
+          period = 60
           stat   = "Maximum"
           region = var.aws_region
           title  = "MinIO Storage Usage"
@@ -488,7 +488,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           metrics = [
             ["MinIO", "UptimeSeconds"]
           ]
-          period = 300
+          period = 60
           stat   = "Maximum"
           region = var.aws_region
           title  = "MinIO Uptime (seconds)"
@@ -504,7 +504,7 @@ resource "aws_cloudwatch_dashboard" "minio_dashboard" {
           metrics = [
             ["MinIO", "APIHealth"]
           ]
-          period = 300
+          period = 60
           stat   = "Minimum"
           region = var.aws_region
           title  = "MinIO API Health"
