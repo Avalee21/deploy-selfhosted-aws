@@ -24,9 +24,9 @@
   <text x="400" y="255" font-family="Arial" font-size="12" text-anchor="middle" fill="#EF6C00">t3.micro EC2 Instance</text>
   
   <!-- S3 Bucket -->
-  <rect x="300" y="320" width="200" height="60" rx="5" ry="5" fill="#FFCCBC" stroke="#D84315" stroke-width="2" />
+  <!-- <rect x="300" y="320" width="200" height="60" rx="5" ry="5" fill="#FFCCBC" stroke="#D84315" stroke-width="2" />
   <text x="400" y="350" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#D84315">Grafana Storage</text>
-  <text x="400" y="370" font-family="Arial" font-size="12" text-anchor="middle" fill="#D84315">S3 Bucket</text>
+  <text x="400" y="370" font-family="Arial" font-size="12" text-anchor="middle" fill="#D84315">S3 Bucket</text> -->
   
   <!-- CloudWatch -->
   <rect x="200" y="440" width="200" height="60" rx="5" ry="5" fill="#FFECB3" stroke="#FFA000" stroke-width="2" />
@@ -50,7 +50,7 @@
   
   <!-- Connection Lines -->
   <!-- EC2 to S3 -->
-  <line x1="400" y1="280" x2="400" y2="320" stroke="#D84315" stroke-width="2" stroke-dasharray="5,3" />
+  <!-- <line x1="400" y1="280" x2="400" y2="320" stroke="#D84315" stroke-width="2" stroke-dasharray="5,3" /> -->
   
   <!-- EC2 to CloudWatch -->
   <line x1="350" y1="280" x2="300" y2="440" stroke="#FFA000" stroke-width="2" stroke-dasharray="5,3" />

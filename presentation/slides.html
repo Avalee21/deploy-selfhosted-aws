@@ -302,15 +302,16 @@
             <div class="subtitle">AWS Implementation</div>
             <ul>
               <li>
-                EC2 Instance: t3.small instance provides sufficient CPU and
-                memory for Node.js
+                <strong>EC2 Instance:</strong> t3.small instance provides
+                sufficient CPU and memory for Node.js
               </li>
               <li>
-                EBS Volume: 20GB persistent storage safeguarding documents if
-                instance terminates
+                <strong>EBS Volume:</strong> 20GB persistent storage
+                safeguarding documents if instance terminates
               </li>
               <li>
-                S3 Backup: Automated daily backups to S3 for disaster recovery
+                <strong>S3 Backup:</strong> Automated daily backups to S3 for
+                disaster recovery
               </li>
               <!-- <li>
                 CloudWatch Monitoring: Custom metrics tracking Cryptpad
@@ -424,33 +425,27 @@
           <div class="column">
             <div class="subtitle">Functionality and Features</div>
             <ul>
-              <li>
-                Comprehensive dashboards visualizing system and application
-                metrics
-              </li>
-              <li>Real-time monitoring of all infrastructure components</li>
-              <li>Pre-configured dashboards for MinIO and Cryptpad</li>
-              <li>Alert capabilities for performance thresholds</li>
-              <li>Single pane of glass for operational monitoring</li>
+              <li>Open-source visualization and monitoring platform</li>
+              <li>Supports multiple data sources including CloudWatch</li>
+              <li>Interactive dashboards with real-time updates</li>
+              <li>Advanced querying and transformation capabilities</li>
+              <li>Alerting system with multiple notification channels</li>
             </ul>
           </div>
           <div class="column">
             <div class="subtitle">AWS Implementation</div>
             <ul>
               <li>
-                EC2 Instance: t3.micro instance sufficient for monitoring
-                requirements
-              </li>
-              <li>CloudWatch Integration: Pulling metrics from all services</li>
-              <li>
-                S3 Storage: Persistent configuration and dashboard backups
+                <strong>EC2 Instance:</strong> Lightweight t3.micro deployment
+                optimized for visualization workloads
               </li>
               <li>
-                Security Groups: Controlled access to management interface
+                <strong>CloudWatch Integration:</strong> Centralized metric
+                collection from all distributed services
               </li>
               <li>
-                Custom Dashboards: Purpose-built visualizations for our specific
-                services
+                <strong>Custom Dashboards:</strong> Tailored monitoring
+                interfaces with service-specific performance panels
               </li>
             </ul>
           </div>
@@ -508,7 +503,7 @@
     </div> -->
 
     <!-- Slide 8: What We Can Achieve -->
-    <div id="slide8" class="slide">
+    <!-- <div id="slide8" class="slide">
       <div class="title">What We Have Achieved</div>
       <div class="content">
         <div class="card" style="border-left-color: #1565c0">
@@ -533,15 +528,15 @@
             metrics, and resource utilization through intuitive dashboards
           </p>
         </div>
-        <!-- <div class="card" style="border-left-color: #6a1b9a">
+        <div class="card" style="border-left-color: #6a1b9a">
           <div class="card-title">Disaster Recovery</div>
           <p>
             Quickly recover from failures through our multi-layered backup
             strategy spanning both S3 and persistent EBS volumes
           </p>
-        </div> -->
+        </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Slide 9: Conclusion -->
     <div id="slide9" class="slide gradient-bg">
@@ -552,9 +547,11 @@
           style="max-width: 800px; text-align: center; background-color: white"
         >
           <p style="font-size: 1.2rem">
-            This architecture demonstrates how to build a robust, multi-service
-            cloud environment that delivers real business value while working
-            within the constraints of AWS Academy resources.
+            This architecture showcases how to architect a
+            <strong>resilient, integrated collaboration platform</strong> that
+            provides real business value through secure document editing,
+            reliable storage, and comprehensive monitoring—all while efficiently
+            utilizing limited AWS Academy resources.
           </p>
         </div>
       </div>

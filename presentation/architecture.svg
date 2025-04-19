@@ -74,9 +74,9 @@
   <text x="190" y="470" font-family="Arial" font-size="9" text-anchor="middle" fill="#232F3E">Grafana v10.0.3</text>
   
   <!-- S3 Bucket for Grafana -->
-  <rect x="310" y="410" width="130" height="40" fill="#FFD07A" stroke="#E78C07" stroke-width="2" rx="3" ry="3"/>
+  <!-- <rect x="310" y="410" width="130" height="40" fill="#FFD07A" stroke="#E78C07" stroke-width="2" rx="3" ry="3"/>
   <text x="375" y="430" font-family="Arial" font-size="11" text-anchor="middle" font-weight="bold" fill="#232F3E">S3 Bucket</text>
-  <text x="375" y="445" font-family="Arial" font-size="9" text-anchor="middle" fill="#232F3E">Grafana Storage</text>
+  <text x="375" y="445" font-family="Arial" font-size="9" text-anchor="middle" fill="#232F3E">Grafana Storage</text> -->
   
   <!-- Cryptpad Server -->
   <rect x="100" y="570" width="180" height="80" fill="#C3E6CB" stroke="#1D7902" stroke-width="2" rx="5" ry="5"/>
@@ -152,7 +152,7 @@
   <line x1="310" y1="590" x2="280" y2="590" stroke="#693CC5" stroke-width="1" stroke-dasharray="3,3"/>
   
   <!-- S3 to Grafana Server -->
-  <line x1="310" y1="430" x2="280" y2="430" stroke="#E78C07" stroke-width="1" stroke-dasharray="3,3"/>
+  <!-- <line x1="310" y1="430" x2="280" y2="430" stroke="#E78C07" stroke-width="1" stroke-dasharray="3,3"/> -->
   
   <!-- S3 to Cryptpad Server -->
   <line x1="310" y1="640" x2="280" y2="640" stroke="#E78C07" stroke-width="1" stroke-dasharray="3,3"/>
