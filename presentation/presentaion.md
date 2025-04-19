@@ -66,6 +66,21 @@ This architecture demonstrates how to build a robust, multi-service cloud enviro
 - Comprehensive monitoring and visualization
 - Strong data protection through multiple backup mechanisms
 
+
+Slide 1: Title Slide
+"Welcome to our presentation on the AWS Cloud-Based Collaborative Environment. Today, I'll be walking you through a secure, integrated platform we've developed for document collaboration, object storage, and comprehensive monitoring."
+
+Slide 2: What We've Deployed
+"We've implemented three core services that work together to create our collaborative environment:
+First, Cryptpad - a zero-knowledge collaborative document editor with end-to-end encryption that ensures your documents remain private and secure.
+Second, MinIO - an S3-compatible object storage system that provides distributed storage with the reliability and functionality of AWS S3, but with added benefits I'll explain later.
+And finally, Grafana - our comprehensive monitoring platform that gives us complete visibility into how the entire system is performing."
+
+Slide 3: Architecture Overview
+"Here you can see the overall architecture of our solution. Everything is built on a shared VPC with integrated services working together.
+In the center of our design, Cryptpad serves as our front-end collaborative platform, MinIO provides the underlying storage infrastructure, and Grafana monitors everything by pulling metrics from CloudWatch.
+
+
 This diagram shows our MinIO storage system in AWS Cloud. We built it to be reliable by putting it in two different zones (A and B).
 We set up a shared network (VPC 10.0.0.0/16) as the foundation. In each zone, we have a MinIO server running on a small t3.micro computer. These servers are in their own networks - Subnet A (10.0.1.0/24) and Subnet B (10.0.2.0/24).
 The MinIO software runs in Docker containers, making it easy to manage. Each server has 30GB of storage, giving us 60GB total.
