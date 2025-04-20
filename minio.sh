@@ -82,8 +82,18 @@ cat > /tmp/collect_metrics.sh << 'EOL'
 # Get current timestamp
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 
-# System metrics
-DISK_UTIL=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+# System metrics - Updated to check for MinIO data directory
+if [ -d "/minio/data" ]; then
+    DISK_UTIL=$(df -h /minio/data | awk 'NR==2 {print $5}' | sed 's/%//')
+    # Fallback to root filesystem if the above command returns empty
+    if [ -z "$DISK_UTIL" ]; then
+        DISK_UTIL=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+    fi
+else
+    # If MinIO data directory doesn't exist, use root filesystem
+    DISK_UTIL=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+fi
+
 MEM_UTIL=$(free | grep Mem | awk '{ printf "%.2f", $3/$2 * 100 }')
 CPU_UTIL=$(top -bn1 | grep "Cpu(s)" | awk '{ printf "%.2f", $2 + $4 }')
 
@@ -96,7 +106,10 @@ fi
 # MinIO health check
 MINIO_HEALTH=0
 if [ $MINIO_STATUS -eq 1 ]; then
-    MINIO_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/minio/health/live)
+    HEALTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/minio/health/live)
+    if [ -n "$HEALTH_CODE" ] && [ "$HEALTH_CODE" != "000" ]; then
+        MINIO_HEALTH=$HEALTH_CODE
+    fi
 fi
 
 # Server uptime
@@ -117,7 +130,7 @@ aws cloudwatch put-metric-data --namespace MinIO --metric-name "MemoryUtilizatio
 aws cloudwatch put-metric-data --namespace MinIO --metric-name "CPUUtilization" --value "${CPU_UTIL}" --region us-east-1
 aws cloudwatch put-metric-data --namespace MinIO --metric-name "ServiceStatus" --value "${MINIO_STATUS}" --region us-east-1
 aws cloudwatch put-metric-data --namespace MinIO --metric-name "APIHealth" --value "${MINIO_HEALTH}" --region us-east-1
-aws cloudwatch put-metric-data --namespace MinIO --metric-name "ServerUptime" --value "${UPTIME}" --region us-east-1
+aws cloudwatch put-metric-data --namespace MinIO --metric-name "UptimeSeconds" --value "${UPTIME}" --region us-east-1
 EOL
 
 sudo mv /tmp/collect_metrics.sh /usr/local/bin/collect_metrics.sh
@@ -126,7 +139,7 @@ sudo chmod +x /usr/local/bin/collect_metrics.sh
 # 5. Set up metrics collection as a background process
 echo -e "\n=== STARTING METRICS COLLECTION ==="
 sudo pkill -f "collect_metrics.sh" 2>/dev/null || true
-sudo bash -c 'while true; do /usr/local/bin/collect_metrics.sh >> /var/log/minio_metrics.log; sleep 60; done' > /dev/null 2>&1 &
+sudo bash -c 'while true; do /usr/local/bin/collect_metrics.sh >> /var/log/minio_metrics.log 2>&1; sleep 60; done' > /dev/null 2>&1 &
 echo "Metrics collection started in background (PID: $!)"
 echo "Log file: /var/log/minio_metrics.log"
 
